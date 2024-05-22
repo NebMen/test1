@@ -1,0 +1,65 @@
+---
+title: "bioinformatics test"
+author: "Nebiyou Mengistu"
+date: "2024-05-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+setwd("~/Georgetown Bioinformatics/testing in r")
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+```
+
+
+```{r}
+library(seqinr)
+# Testing from the book
+dengue <- read.fasta(file = "sequence.fasta")
+myco <- read.fasta(file = "mycobacterium leprae seq.fasta.fdmdownload")
+
+dengueseq <- dengue[[1]]
+dengueseq[1:50]
+length(dengueseq)
+```
+
+```{r}
+# Exercise1
+tail(dengueseq, 20)
+
+# Exercise2
+mycoseq <- myco[[1]]
+length(mycoseq)
+
+# Exercise3
+count(mycoseq, 1)
+
+# Exercise4
+
+#This is the percentage of GC nucleotides
+(465908 + 412183)*100 / (465908+412183+294836+339175)
+
+#Exercise5
+get_complement <- function(nucleotide) {
+  complement_map <- c("A" = "T", "T" = "A", "C" = "G", "G" = "C")
+  return(complement_map[nucleotide])
+}
+
+complement_seq = sapply(strsplit(mycoseq, "")[[1]], get_complement)
+complement_seq = paste(complement_seq, collapse = "")
+
+
+nucleotide_counts = table(complement_seq)
+
+print(nucleotide_counts)
+
+#Exercise6
+count(mycoseq, 2) 
+# the numbers under cc, cg, and gc
+
+#Exercise7
+mycoseq_length = length(mycoseq)
+mycoseq[1:1000]
+mycoseq[(mycoseq_length-999):mycoseq_length]
+```
+
