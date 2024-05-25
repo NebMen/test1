@@ -1,0 +1,108 @@
+---
+title: "genes in r studio ch5"
+author: "Nebiyou Mengistu"
+date: "2024-05-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("~/Georgetown Bioinformatics/testing in r")
+```
+
+
+```{r}
+# Question 1
+library(seqinr)
+dengue = read.fasta(file = "sequence.fasta")
+genome_seq = as.character(dengue[[1]])
+
+window_size = 200
+gc_content =  sapply(seq_along(genome_seq) - window_size + 1, function(i) {
+  gc(substr(genome_seq, i, i + window_size - 1))[1]
+})
+
+window_size = 2000
+gc_content = sapply(seq_along(genome_seq) - window_size + 1, function(i) {
+  gc(substr(genome_seq, i, i + window_size - 1))[1]
+})
+
+plot(1:length(gc_content), gc_content, type = "l", xlab = "Position (bp)", ylab = "GC content")
+```
+
+```{r}
+#Question 2
+mycobacterium = read.fasta(file = "mycobacterium leprae seq.fasta.fdmdownload")
+myco_seq = as.character(mycobacterium)
+window_size = 1000
+gc_content2 = sapply(seq_along(myco_seq) - window_size + 1, function(i) {
+  gc(substr(myco_seq, i, i + window_size - 1))[1]
+})
+
+plot(1:length(gc_content2), gc_content2, type = "l", xlab = "Position (bp)", ylab = "GC content")
+```
+
+```{r}
+#Question 3
+calculate_at_content = function(a_count, t_count, c_count, g_count) {
+  total_nucleotides = a_count + t_count + c_count + g_count
+  at_content = (a_count + t_count) / total_nucleotides
+  return(at_content)
+}
+
+a_count = sum(myco_seq == "A")
+t_count = sum(myco_seq == "T")
+c_count = sum(myco_seq == "C")
+g_count = sum(myco_seq == "G")
+at_content = calculate_at_content(a_count, t_count, c_count, g_count)
+
+cat("The AT content of the Mycobacterium leprae TN genome is:", at_content)
+```
+
+```{r}
+# Question 4
+draw_at_content_plot = function(seq, window_size = 10000, step_size = 1000) {
+  at_contents = sapply(seq(1, length(seq) - window_size + 1, by = step_size), function(i) {
+    window = seq[i:(i + window_size - 1)]
+    a_count = sum(window == "A")
+    t_count = sum(window == "T")
+    c_count = sum(window == "C")
+    g_count = sum(window == "G")
+    (a_count + t_count) / (a_count + t_count + c_count + g_count)
+  })
+
+    x_labels = seq(1, length(seq) - window_size + 1, by = step_size)
+  x_labels = paste0(format(x_labels / 1000, digits = 1), "k")
+
+  plot(at_contents, type = "l", xaxt = "n", xlab = "Position (kb)", ylab = "AT content")
+  axis(1, at = seq(1, length(at_contents), by = length(at_contents) / 10), labels = x_labels[seq(1, length(at_contents), by = length(at_contents) / 10)])
+  title(main = "Sliding Window Plot of AT Content")
+}
+
+myco_seq <- read.fasta("mycobacterium leprae seq.fasta.fdmdownload")[[1]]
+
+# Draw the sliding window plot of AT content
+draw_at_content_plot(myco_seq, window_size = 20000, step_size = 2000)
+```
+
+```{r}
+# Question 5
+observed_count = sum(grepl("GAC GC", genome_seq))
+
+a_freq = sum(genome_seq == "A") / length(myco_seq)
+t_freq = sum(genome_seq == "T") / length(myco_seq)
+c_freq = sum(genome_seq == "C") / length(myco_seq)
+g_freq = sum(genome_seq == "G") / length(myco_seq)
+
+# Calculate the expected frequency of "GAC GC"
+expected_freq = g_freq * a_freq * c_freq * g_freq * c_freq
+expected_count = expected_freq * length(myco_seq)
+
+# Compare the observed and expected counts
+if (observed_count > expected_count) {
+  cat("The 3-nucleotide word 'GAC GC' is over-represented in the Mycobacterium leprae TN genome sequence.")
+} else {
+  cat("The 3-nucleotide word 'GAC GC' is under-represented in the Mycobacterium leprae TN genome sequence.")
+}
+```
+
